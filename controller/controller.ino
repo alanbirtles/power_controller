@@ -4,7 +4,7 @@
 #include "arduino_secrets.h"
 #include <numeric>
 
-char serverAddress[] = "172.21.11.20";
+char serverAddress[] = "172.21.11.3";
 int port = 3000;
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
@@ -21,13 +21,12 @@ StaticJsonDocument<300> doc;
 class RMS
 {
 public:
-
   typedef void (*callback_t)(int value);
 
   RMS(callback_t callback)
-  :callback(callback)
+      : callback(callback)
   {
-    for (float& value:dcValues)
+    for (float &value : dcValues)
     {
       value = NAN;
     }
@@ -84,23 +83,25 @@ private:
     dcOffset = round(std::accumulate(dcValues, dcValues + dcSize, 0) / 5);
     if (valid)
     {
-      callback(round(sqrt(sumSquared/sampleCount)));
+      callback(round(sqrt(sumSquared / sampleCount)));
     }
     sampleCount = 0;
     sum = 0;
     sumSquared = 0;
     min = 4096;
-    max = 0;    
+    max = 0;
   }
 };
 
-void setup() {
+void setup()
+{
   pinMode(POWER_PIN, OUTPUT);
   analogReadResolution(12);
   digitalWrite(POWER_PIN, HIGH);
-  WiFi.setPins(8,7,4,2);
+  WiFi.setPins(8, 7, 4, 2);
   Serial.begin(9600);
-  while ( status != WL_CONNECTED) {
+  while (status != WL_CONNECTED)
+  {
     status = WiFi.begin(ssid, pass);
   }
   byte mac[6];
@@ -108,24 +109,26 @@ void setup() {
   sprintf(address, "/api/v1/power/controller?mac=%02X%02X%02X%02X%02X%02X", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
 }
 
-void loop() {
+void loop()
+{
   Serial.println("starting WebSocket client");
   client.begin(address);
-  RMS rms([](int value)
-  {
+  RMS rms([](int value) {
     doc.clear();
     doc["current"] = value;
     client.beginMessage(TYPE_TEXT);
     serializeJson(doc, client);
     client.endMessage();
   });
-  
-  while (client.connected()) {
+
+  while (client.connected())
+  {
     rms.sample();
 
     // check if a message is available to be received
     int messageSize = client.parseMessage();
-    if (messageSize > 0) {
+    if (messageSize > 0)
+    {
       deserializeJson(doc, client);
       bool power = doc["power"];
       digitalWrite(POWER_PIN, power ? HIGH : LOW);
