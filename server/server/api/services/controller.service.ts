@@ -1,6 +1,8 @@
 import L from '../../common/logger'
 import WebSocket, { CloseEvent, MessageEvent } from 'ws';
 import { ControllersTable, dbPool, dbQuery, dbSelect, ReadingsTable } from '../../common/db';
+import { final } from 'pino';
+import { Readings } from '../../common/types';
 
 class Controller {
   constructor(id: number, mac: string, name: string, conversionFactor: number) {
@@ -125,8 +127,45 @@ export class ControllerService {
         }
         return controller;
       }
+    } finally {
+      connection.release();
     }
-    finally {
+  }
+
+  async getUsage(from: number, to: number, controller?: number): Promise<Readings> {
+    const connection = await dbPool.getConnection()
+    try {
+      let query = `SELECT * FROM ${ControllersTable.table}`;
+      const params = [];
+      if (controller !== undefined) {
+        query += ` WHERE ${ControllersTable.id} = ?`;
+        params.push(controller);
+      }
+      let queryResult = await dbSelect(connection, query, params);
+      const result: Readings = {};
+      for (const row of queryResult) {
+        result[row[ControllersTable.id]] = { name: row[ControllersTable.name] as string, values: [] };
+      }
+      query = `SELECT ${ReadingsTable.controller_id},
+        ${ReadingsTable.min},
+        ${ReadingsTable.max},
+        ${ReadingsTable.avg},
+        UNIX_TIMESTAMP(${ReadingsTable.time}) as ${ReadingsTable.time}
+        FROM ${ReadingsTable.table}
+        WHERE ${ReadingsTable.time} >= FROM_UNIXTIME(?)
+        AND ${ReadingsTable.time} < FROM_UNIXTIME(?)
+        ORDER BY ${ReadingsTable.time} ASC`;
+      queryResult = await dbSelect(connection, query, [from, to]);
+      for (const row of queryResult) {
+        result[row[ReadingsTable.controller_id]].values.push({
+          min: row[ReadingsTable.min],
+          max: row[ReadingsTable.max],
+          avg: row[ReadingsTable.avg],
+          time: row[ReadingsTable.time]
+        });
+      }
+      return result;
+    } finally {
       connection.release();
     }
   }

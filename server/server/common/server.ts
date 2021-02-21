@@ -7,6 +7,7 @@ import os from 'os';
 import cookieParser from 'cookie-parser';
 import L from './logger';
 import WebSocket from 'ws';
+import cors from 'cors';
 
 import installValidator from './openapi';
 import { databaseInit } from './db';
@@ -30,6 +31,11 @@ export default class ExpressServer {
     app.use(cookieParser(process.env.SESSION_SECRET));
     app.use(express.static(`${root}/public`));
     this.addWsHeartbeat(ews.getWss());
+    if (process.env.NODE_ENV == 'development') {
+      let allowedHeaders = ["X-Content-Range", "Content-Type"];
+      app.use(cors({ exposedHeaders: allowedHeaders, allowedHeaders: allowedHeaders, credentials: true, origin: "*" }));
+      L.info("CORS enabled");
+    }
   }
 
   addWsHeartbeat(wss: WebSocket.Server) {

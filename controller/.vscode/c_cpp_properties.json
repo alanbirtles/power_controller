@@ -1,0 +1,40 @@
+{
+    "configurations": [
+        {
+            "name": "Arduino",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:\\Users\\alan\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.6.5\\cores\\arduino",
+                "C:\\Users\\alan\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.6.5\\variants\\feather_m0",
+                "C:\\Users\\alan\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.6.5\\variants\\feather_m4_can",
+                "C:\\Users\\alan\\AppData\\Local\\Arduino15\\packages\\arduino\\tools\\arm-none-eabi-gcc\\7-2017q4\\arm-none-eabi\\include\\c++\\7.2.1",
+                "E:/My Documents/Arduino/libraries/ArduinoJson/src",
+                "E:/My Documents/Arduino/libraries/Wifi101/src",
+                "E:/My Documents/Arduino/libraries/ArduinoHttpClient/src"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.18362.0",
+            "compilerPath": "C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr\\bin\\avr-c++.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        },
+        {
+            "name": "Arduino",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "windowsSdkVersion": "10.0.18362.0",
+            "compilerPath": "\"C:\\Program Files (x86)\\Arduino\\hardware\\tools\\avr\\bin\\avr-c++.exe\"",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

@@ -1,2 +1,3 @@
 controller/arduino_secrets.h
 server/.vscode/
+server/public/
