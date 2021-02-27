@@ -17,6 +17,7 @@ int status = WL_IDLE_STATUS;
 int count = 0;
 char address[42];
 StaticJsonDocument<300> doc;
+unsigned long lastConnection;
 
 class RMS
 {
@@ -95,9 +96,10 @@ private:
 
 void setup()
 {
+  lastConnection = millis();
   pinMode(POWER_PIN, OUTPUT);
   analogReadResolution(12);
-  digitalWrite(POWER_PIN, HIGH);
+  digitalWrite(POWER_PIN, LOW);
   WiFi.setPins(8, 7, 4, 2);
   Serial.begin(9600);
   while (status != WL_CONNECTED)
@@ -133,6 +135,12 @@ void loop()
       bool power = doc["power"];
       digitalWrite(POWER_PIN, power ? HIGH : LOW);
     }
+    lastConnection = millis();
+  }
+  if (millis() - lastConnection > 5 * 60 * 1000)
+  {
+    // disconnected for more than 5 minutes, fail safe to power on
+    digitalWrite(POWER_PIN, HIGH);
   }
 
   Serial.println("disconnected");
