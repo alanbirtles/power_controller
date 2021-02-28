@@ -10,3 +10,5 @@ del ..\..\server\public\js\*.map
 cd ..\..\server
 call npm install
 call npm run compile
+
+pause

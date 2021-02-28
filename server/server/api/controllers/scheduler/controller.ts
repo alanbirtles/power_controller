@@ -40,6 +40,7 @@ export class Controller {
       const id = parseInt(req.params["id"]);
       const removed = await SchedulerService.remove(id);
       if (removed) {
+        await SchedulerService.init();
         res.status(204);
       } else {
         res.status(404);
@@ -54,6 +55,7 @@ export class Controller {
     try {
       const schedule: Schedule = req.body;
       await SchedulerService.update(schedule);
+      await SchedulerService.init();
       res.status(204);
       res.send();
     } catch (err) {

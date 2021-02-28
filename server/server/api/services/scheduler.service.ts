@@ -145,8 +145,8 @@ export class SchedulerService {
   private movePastTime(schedule: Schedule, time: number) {
     if (schedule.start < time) {
       const diff = time - schedule.start;
-      const count = Math.floor(diff / (schedule.interval * 60 * 1000))
-      const newStart = schedule.start + count * schedule.interval * 60 * 1000;
+      const count = Math.floor(diff / (schedule.interval * 60))
+      const newStart = schedule.start + count * schedule.interval * 60;
       L.info(`Altering schedule start time from ${new Date(schedule.start * 1000)} to ${new Date(newStart * 1000)}`);
       schedule.start = newStart;
     }
@@ -189,7 +189,7 @@ export class SchedulerService {
       });
       if (this.schedules.length > 0) {
         const timeout = this.schedules[0].start - time;
-        L.info(`scheduler waiting for ${timeout / 60} minutes until ${new Date(this.schedules[0].start)}`);
+        L.info(`scheduler waiting for ${timeout / 60} minutes until ${new Date(this.schedules[0].start * 1000)}`);
         this.timer = setTimeout(() => { this.processSchedules(false); }, timeout * 1000);
       } else {
         L.info(`no scheduled tasks`);
