@@ -1,12 +1,10 @@
 import L from '../../common/logger'
 import WebSocket, { CloseEvent, MessageEvent } from 'ws';
 import { ControllersTable, dbPool, dbQuery, dbSelect, ReadingsTable } from '../../common/db';
-import { final } from 'pino';
-import { Readings } from '../../common/types';
+import { Readings, Controller } from '../../common/types';
 
-class Controller {
+class ControllerImpl {
   constructor(id: number, mac: string, name: string, conversionFactor: number) {
-    L.info("connected mac: " + mac)
     this.id = id;
     this.mac = mac;
     this.name = name;
@@ -14,6 +12,7 @@ class Controller {
   }
 
   setWs(ws: WebSocket) {
+    L.info("connected mac: " + this.mac)
     if (this.ws) {
       this.ws.close();
     }
@@ -78,7 +77,9 @@ class Controller {
 
   setPower(value: boolean) {
     this.power = value;
-    this.ws.send(JSON.stringify({ power: this.power }));
+    if (this.ws) {
+      this.ws.send(JSON.stringify({ power: this.power }));
+    }
   }
 
   id: number;
@@ -96,14 +97,14 @@ class Controller {
 }
 
 export class ControllerService {
-  controllers: { [id: number]: Controller } = {};
+  controllers: { [id: number]: ControllerImpl } = {};
 
   async addWebsocket(ws: WebSocket, mac: string) {
     const controller = await this.getController(mac);
     controller.setWs(ws);
   }
 
-  async getController(mac: string): Promise<Controller> {
+  async getController(mac: string): Promise<ControllerImpl> {
     const connection = await dbPool.getConnection()
     try {
       const result = await dbSelect(connection, `SELECT * FROM ${ControllersTable.table} WHERE ${ControllersTable.mac} = ?`, [mac]);
@@ -114,7 +115,7 @@ export class ControllerService {
           ${ControllersTable.conversion_factor})
           VALUES (?, ?, ?)`, [mac, "New", 1]);
         const id = result.insertId;
-        const controller = new Controller(id, mac, "New", 1);
+        const controller = new ControllerImpl(id, mac, "New", 1);
         this.controllers[id] = controller;
         return controller;
       }
@@ -122,7 +123,7 @@ export class ControllerService {
         const id = result[0][ControllersTable.id];
         let controller = this.controllers[id];
         if (!controller) {
-          controller = new Controller(id, mac, result[0][ControllersTable.name], result[0][ControllersTable.conversion_factor]);
+          controller = new ControllerImpl(id, mac, result[0][ControllersTable.name], result[0][ControllersTable.conversion_factor]);
           this.controllers[id] = controller;
         }
         return controller;
@@ -130,6 +131,21 @@ export class ControllerService {
     } finally {
       connection.release();
     }
+  }
+
+  async setPower(id: number, power: boolean) {
+    let controller = this.controllers[id];
+    if (!controller) {
+      const connection = await dbPool.getConnection()
+      try {
+        const result = await dbSelect(connection, `SELECT * FROM ${ControllersTable.table} WHERE ${ControllersTable.id} = ?`, [id]);
+        controller = new ControllerImpl(id, result[0][ControllersTable.mac], result[0][ControllersTable.name], result[0][ControllersTable.conversion_factor]);
+      } finally {
+        connection.release();
+      }
+      this.controllers[id] = controller;
+    }
+    controller.setPower(power);
   }
 
   async getUsage(from: number, to: number, controller?: number): Promise<Readings> {
@@ -163,6 +179,21 @@ export class ControllerService {
           avg: row[ReadingsTable.avg],
           time: row[ReadingsTable.time]
         });
+      }
+      return result;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async all(): Promise<Controller[]> {
+    const connection = await dbPool.getConnection()
+    try {
+      let query = `SELECT * FROM ${ControllersTable.table}`;
+      let queryResult = await dbSelect(connection, query);
+      const result: Controller[] = [];
+      for (const row of queryResult) {
+        result.push({ name: row[ControllersTable.name], controllerId: row[ControllersTable.id] });
       }
       return result;
     } finally {

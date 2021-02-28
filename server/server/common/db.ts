@@ -37,6 +37,17 @@ export namespace ReadingsTable {
   export const avg = "avg";
 }
 
+export namespace SchedulesTable {
+  export const table = "schedules";
+
+  export const id = "schedule_id";
+  export const start = "start";
+  export const end = "end";
+  export const interval = "_interval";
+  export const power = "power";
+  export const controller_ids = "controller_ids";
+}
+
 export async function select(connection: mysql.PoolConnection, sql: string, values?: any[]): Promise<mysql.RowDataPacket[]> {
   L.info(`mysql select: ${sql}, ${values}`);
   const result = await connection.execute<mysql.RowDataPacket[]>(sql, values);
@@ -68,6 +79,21 @@ const schemaVersions = [
     `ALTER TABLE ${ReadingsTable.table}
       ADD KEY ${ReadingsTable.time} (${ReadingsTable.time}),
       ADD KEY ${ReadingsTable.controller_id} (${ReadingsTable.controller_id})
+      ;
+    `,
+  ],
+  [
+    `CREATE TABLE ${SchedulesTable.table} (
+      ${SchedulesTable.id} INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      ${SchedulesTable.start} DATETIME NOT NULL,
+      ${SchedulesTable.end} DATETIME,
+      ${SchedulesTable.interval} INT UNSIGNED NOT NULL,
+      ${SchedulesTable.power} BOOLEAN,
+      ${SchedulesTable.controller_ids} TEXT
+    );`,
+    `ALTER TABLE ${SchedulesTable.table}
+      ADD KEY ${SchedulesTable.start} (${SchedulesTable.start}),
+      ADD KEY ${SchedulesTable.end} (${SchedulesTable.end})
       ;
     `,
   ]

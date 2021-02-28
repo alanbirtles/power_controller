@@ -32,5 +32,14 @@ export class Controller {
       next(err);
     }
   }
+
+  async all(req: Request, res: Response, next: NextFunction) {
+    try {
+      const controllers = await ControllerService.all();
+      res.json(controllers);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 export default new Controller();

@@ -11,6 +11,7 @@ import cors from 'cors';
 
 import installValidator from './openapi';
 import { databaseInit } from './db';
+import SchedulerService from '../api/services/scheduler.service';
 
 const ews = expressWs(express());
 const app = ews.app;
@@ -73,15 +74,18 @@ export default class ExpressServer {
         `up and running in ${process.env.NODE_ENV ||
         'development'} @: ${os.hostname()} on port: ${p}}`
       );
-    databaseInit().then(() => {
-      installValidator(app, this.routes).then(() => {
+    const init = async () => {
+      try {
+        await databaseInit();
+        await SchedulerService.init();
+        await installValidator(app, this.routes);
         app.listen(port, welcome(port));
-      }).catch(e => {
+      } catch (e) {
         L.error(e);
-        exit(1)
-      });
-    });
-
+        exit(1);
+      }
+    };
+    init();
     return app;
   }
 }

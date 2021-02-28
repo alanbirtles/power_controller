@@ -3,7 +3,7 @@ import { Readings } from '@/types';
 import { Module, VuexModule, Mutation, Action, MutationAction } from 'vuex-module-decorators'
 import { usageModule } from "@/store/modules";
 
-@Module({ name: "usage" })
+@Module({ name: "usage", namespaced: true })
 export default class Usage extends VuexModule {
   private loadingTimer!: NodeJS.Timeout;
 
@@ -63,13 +63,11 @@ export default class Usage extends VuexModule {
     this.setLoading(true);
     this.clearLoadErrors();
     try {
-      try {
-        const readings = await api.getUsage(this.from, this.to);
-        this.setReadings(readings);
-      }
-      catch (err) {
-        this.addLoadError(err);
-      }
+      const readings = await api.getUsage(this.from, this.to);
+      this.setReadings(readings);
+    }
+    catch (err) {
+      this.addLoadError(err);
     }
     finally {
       this.setLoading(false);

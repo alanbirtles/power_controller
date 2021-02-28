@@ -1,4 +1,4 @@
-import { Readings } from './types';
+import { Controller, Readings, Schedule } from './types';
 import querystring from 'querystring';
 
 class API {
@@ -12,12 +12,40 @@ class API {
     return this.get("power/usage", { from: from.getTime() / 1000, to: to.getTime() / 1000, controller });
   }
 
+  getSchedules(): Promise<Schedule[]> {
+    return this.get("scheduler");
+  }
+
+  addSchedule(value: Schedule) {
+    return this.post("scheduler", value, 200);
+  }
+
+  updateSchedule(value: Schedule) {
+    return this.put("scheduler/" + value.scheduleId, value, 204);
+  }
+
+  deleteSchedule(id: number) {
+    return this.delete("scheduler/" + id, 204);
+  }
+
+  getControllers(): Promise<Controller[]> {
+    return this.get("power");
+  }
+
   get(url: string, query?: querystring.ParsedUrlQueryInput): Promise<any> {
     return this.doFetch(url, "GET", null, query, 200);
   }
 
   post(url: string, body: Record<string, any>, expectedCode?: number) {
     return this.doFetch(url, "POST", body, undefined, expectedCode);
+  }
+
+  put(url: string, body: Record<string, any>, expectedCode?: number) {
+    return this.doFetch(url, "PUT", body, undefined, expectedCode);
+  }
+
+  delete(url: string, expectedCode?: number) {
+    return this.doFetch(url, "DELETE", null, undefined, expectedCode);
   }
 
   async doFetch(url: string, method: string, body: Record<string, any> | null, query?: querystring.ParsedUrlQueryInput, expectedCode?: number): Promise<any> {
@@ -37,7 +65,11 @@ class API {
     if (expectedCode && response.status != expectedCode) {
       throw Error("Unexpected return code: " + response.status);
     }
-    return response.json();
+    if (response.status === 204) {
+      return null;
+    } else {
+      return response.json();
+    }
   }
 
 }

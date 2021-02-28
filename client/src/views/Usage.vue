@@ -39,7 +39,7 @@ function mATokW(value: number) {
 })
 export default class Usage extends Vue {
   get fromDate() {
-    return usageModule.from.toDateString();
+    return usageModule.from.toISOString().split("T")[0];
   }
 
   set fromDate(value: string) {
@@ -47,7 +47,7 @@ export default class Usage extends Vue {
   }
 
   get toDate() {
-    return usageModule.to.toDateString();
+    return usageModule.to.toISOString().split("T")[0];
   }
 
   set toDate(value: string) {
@@ -56,13 +56,10 @@ export default class Usage extends Vue {
 
   get usageData(): Chart.ChartData {
     if (!usageModule.readings) {
-      console.log("no data");
       return {};
     }
     const datasets: ChartDataSets[] = [];
-    console.log(usageModule.readings);
     for (const controllerId in usageModule.readings) {
-      console.log("adding controller", controllerId);
       const controller = usageModule.readings[controllerId];
       const dataSet: ChartDataSetsErrorBar = {};
       dataSet.label = controller.name;
@@ -82,7 +79,6 @@ export default class Usage extends Vue {
       dataSet.errorBarWhiskerColor = colours[datasets.length % colours.length];
       datasets.push(dataSet);
     }
-    console.log(datasets);
     return {
       datasets,
     };
