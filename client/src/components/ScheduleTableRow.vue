@@ -4,9 +4,7 @@
       <input
         type="datetime-local"
         :value="getDateTimeLocalString(start)"
-        @input="
-          start = new Date(Date.parse($event.target.value)).getTime() / 1000
-        "
+        @input="start = parseISOLocal($event.target.value)"
       />
     </td>
     <td>
@@ -14,9 +12,7 @@
       <input
         type="datetime-local"
         :value="getDateTimeLocalString(end)"
-        @input="
-          end = new Date(Date.parse($event.target.value)).getTime() / 1000
-        "
+        @input="end = parseISOLocal($event.target.value)"
         :disabled="endNull"
       />
     </td>
@@ -67,11 +63,15 @@ export default class ScheduleTableRow extends Vue {
   private power = true;
   private controllerIds: number[] = [];
   private scheduleId: number | null = null;
+  
+  parseISOLocal(iso: string) {
+    const b = iso.split(/\D/);
+    return new Date(parseInt(b[0]), parseInt(b[1])-1, parseInt(b[2]), parseInt(b[3]), parseInt(b[4])).getTime() / 1000;
+  }
 
   getDateTimeLocalString(timestamp: number) {
     const date = new Date(timestamp * 1000);
-    const isoString = date.toISOString();
-    return isoString.substring(0, ((isoString.indexOf("T") | 0) + 6) | 0);
+    return `${date.getFullYear().toString().padStart(4,'0')}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}T${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}:${date.getSeconds().toString().padStart(2,'0')}`
   }
 
   mounted() {
