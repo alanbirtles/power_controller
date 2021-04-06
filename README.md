@@ -1,8 +1,8 @@
-#Power Controller
+# Power Controller
 
 This repository contains the source code for a WiFi power controller.
 
-##Hardware
+## Hardware
 
 The hardware consists of (most components can be easily substituted and some are excessive for lower current applications):
 1. [Adafruit Feather M0 WiFi](https://www.adafruit.com/product/3010)
@@ -19,11 +19,11 @@ Be cautious if ordering an ACS712 from Banggood.com, my 20A sensors were deliver
 
 R1 and R2 should be chosen to reduce the 5V output of the ACS712 to the 3.3V range readable by the Analog inputs of the M0 (e.g. R1 should be approximately twice the value of R2).
 
-##Controller software
+## Controller software
 
 Written using Arduino using the Wifi101 and [ArduinoJson](https://arduinojson.org/) libraries. The Wifi SSID and password should be added to secrets.h. `serverAddress` and `port` should be updated to the address of the server.
 
-##Server
+## Server
 
 Collects readings from the controllers and stores them in a MySQL database. Also provides a REST API for the client.
 
@@ -52,7 +52,7 @@ c = 3.3 / 0.1 * (10 + 20) / 20 / 4096 * 1000
 c = 12.85
 ```
 
-##Client
+## Client
 
 Uses the server's REST API to set schedules and show power usage.
 
