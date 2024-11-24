@@ -4,7 +4,7 @@
   "description": "Power Control Server",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node dist/index.js | pino-pretty -t",
     "compile": "ts-node build.ts && tsc",
     "dev": "nodemon server/index.ts | pino-pretty -t",
     "dev:debug": "nodemon --exec 'node -r ts-node/register --inspect-brk' server/index.ts | pino-pretty -t",

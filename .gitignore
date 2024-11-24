@@ -1,3 +1,4 @@
-controller/arduino_secrets.h
+controller/src/arduino_secrets.h
 server/.vscode/
 server/public/
+arduino_build/

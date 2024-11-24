@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <ArduinoHttpClient.h>
 #include <WiFi101.h>
 #include <ArduinoJson.h>
@@ -115,13 +116,13 @@ void loop()
 {
   Serial.println("starting WebSocket client");
   client.begin(address);
-  RMS rms([](int value) {
+  RMS rms([](int value)
+          {
     doc.clear();
     doc["current"] = value;
     client.beginMessage(TYPE_TEXT);
     serializeJson(doc, client);
-    client.endMessage();
-  });
+    client.endMessage(); });
 
   while (client.connected())
   {

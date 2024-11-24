@@ -85,6 +85,14 @@ class ControllerImpl {
   id: number;
   mac: string;
   name: string;
+  /**
+    * reading to milliamps
+    * sensor outputs 100mV/Amp
+    * divided by resistors r1 and r2 where r1 is approx 2 * r2
+    * reading is 0-2^12 for 0-3.3v
+    * reading * conversion factor = value in mA
+    * conversion factor = 3.3*10000*(r1+r2)/r1/4096
+    */
   conversionFactor: number;
   ws: WebSocket = null;
   power = true;

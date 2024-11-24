@@ -171,6 +171,9 @@ export class SchedulerService {
       this.schedules = this.schedules.filter((value) => {
         return !value.end || value.start < value.end;
       })
+      this.schedules.sort((a, b) => {
+        return a.start - b.start;
+      });
       for (const schedule of this.schedules) {
         if (schedule.start > time) {
           break;
