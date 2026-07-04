@@ -5,8 +5,8 @@
 #include "arduino_secrets.h"
 #include <numeric>
 
-char serverAddress[] = "172.21.11.3";
-int port = 3000;
+char serverAddress[] = "172.21.11.44";
+int port = 8123;
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
 const int POWER_PIN = 5;

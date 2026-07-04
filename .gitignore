@@ -2,3 +2,4 @@ controller/src/arduino_secrets.h
 server/.vscode/
 server/public/
 arduino_build/
+home_assist/power_ws/__pycache__/
