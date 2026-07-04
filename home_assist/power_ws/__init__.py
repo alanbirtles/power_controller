@@ -34,7 +34,7 @@ class PowerWSView(HomeAssistantView):
 
     async def get(self, request):
         """Handle WebSocket handshake."""
-        ws = web.WebSocketResponse()
+        ws = web.WebSocketResponse(heartbeat=30)
         await ws.prepare(request)
 
         mac = request.query.get("mac")
@@ -65,5 +65,6 @@ class PowerWSView(HomeAssistantView):
         finally:
             _LOGGER.info("Device %s disconnected", mac)
             self.hass.data[DOMAIN]["connections"].pop(mac, None)
+            self.hass.bus.async_fire(f"{DOMAIN}_device_disconnected_{mac}")
 
         return ws

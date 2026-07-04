@@ -22,32 +22,6 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities):
     hass.bus.async_listen(f"{DOMAIN}_device_connected", device_connected)
 
 
-# class PowerWSSwitch(SwitchEntity):
-#     def __init__(self, hass: HomeAssistant, mac: str):
-#         self.hass = hass
-#         self._mac = mac
-#         self._attr_name = f"Power Switch {mac}"
-#         self._attr_unique_id = f"{mac}_switch"
-#         self._is_on = False
-#
-#     @property
-#     def is_on(self):
-#         return self._is_on
-#
-#     async def async_turn_on(self, **kwargs):
-#         await self._send_command(True)
-#
-#     async def async_turn_off(self, **kwargs):
-#         await self._send_command(False)
-#
-#     async def _send_command(self, state):
-#         ws = self.hass.data[DOMAIN]["connections"].get(self._mac)
-#         if ws:
-#             await ws.send_json({"power": state})
-#             self._is_on = state
-#             self.async_write_ha_state()
-
-
 class PowerWSCurrentSensor(SensorEntity):
     def __init__(self, hass: HomeAssistant, mac: str, multiplier: float):
         self._mac = mac
@@ -61,11 +35,18 @@ class PowerWSCurrentSensor(SensorEntity):
 
     async def async_added_to_hass(self):
         self.hass.bus.async_listen(f"{DOMAIN}_data_{self._mac}", self._update_data)
+        self.hass.bus.async_listen(
+            f"{DOMAIN}_device_disconnected_{self._mac}", self._device_disconnected
+        )
 
     async def _update_data(self, event):
         raw_current = event.data.get("current", 0)
         self._state = int(float(raw_current) * self._multiplier)
         self.async_write_ha_state()
+
+    async def _device_disconnected(self, event):
+        await self.async_remove()
+        del self.hass.data[DOMAIN]["devices"][self._mac]
 
     @property
     def native_value(self):
