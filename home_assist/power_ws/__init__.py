@@ -63,8 +63,9 @@ class PowerWSView(HomeAssistantView):
                         "WS connection closed with exception %s", ws.exception()
                     )
         finally:
-            _LOGGER.info("Device %s disconnected", mac)
-            self.hass.data[DOMAIN]["connections"].pop(mac, None)
-            self.hass.bus.async_fire(f"{DOMAIN}_device_disconnected_{mac}")
+            if self.hass.data[DOMAIN]["connections"][mac] == ws:
+                _LOGGER.info("Device %s disconnected", mac)
+                self.hass.data[DOMAIN]["connections"].pop(mac, None)
+                self.hass.bus.async_fire(f"{DOMAIN}_device_disconnected_{mac}")
 
         return ws

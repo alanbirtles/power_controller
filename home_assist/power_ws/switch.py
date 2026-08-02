@@ -46,7 +46,7 @@ class PowerWSCurrentSensor(SensorEntity):
 
     async def _device_disconnected(self, event):
         await self.async_remove()
-        del self.hass.data[DOMAIN]["devices"][self._mac]
+        self.hass.data[DOMAIN]["devices"].pop(self._mac, None)
 
     @property
     def native_value(self):

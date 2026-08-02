@@ -103,19 +103,41 @@ void setup()
   digitalWrite(POWER_PIN, LOW);
   WiFi.setPins(8, 7, 4, 2);
   Serial.begin(9600);
-  while (status != WL_CONNECTED)
-  {
-    status = WiFi.begin(ssid, pass);
-  }
-  byte mac[6];
-  WiFi.macAddress(mac);
-  sprintf(address, "/api/v1/power/controller?mac=%02X%02X%02X%02X%02X%02X", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
+  client.setHttpResponseTimeout(1000);
 }
 
 void loop()
 {
+  status = WiFi.status();
+  while (status != WL_CONNECTED)
+  {
+    Serial.println("connecting to wifi");
+    status = WiFi.begin(ssid, pass);
+    if (status != WL_CONNECTED)
+    {
+      Serial.print("failed to connect: ");
+      Serial.println(status);
+      delay(2000);
+    }
+  }
+  Serial.println("wifi connected");
+  if (!hasMac)
+  {
+    byte mac[6];
+    WiFi.macAddress(mac);
+    sprintf(address, "/api/v1/power/controller?mac=%02X%02X%02X%02X%02X%02X", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
+    hasMac = true;
+  }
   Serial.println("starting WebSocket client");
-  client.begin(address);
+  int result = client.begin(address);
+  if (result != 0)
+  {
+    Serial.print("failed to connect: ");
+    Serial.println(result);
+    delay(2000);
+    return;
+  }
+  Serial.print("client connected");
   RMS rms([](int value)
           {
     doc.clear();
