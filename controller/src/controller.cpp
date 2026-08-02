@@ -19,6 +19,7 @@ int count = 0;
 char address[42];
 StaticJsonDocument<300> doc;
 unsigned long lastConnection;
+bool hasMac = false;
 
 class RMS
 {
